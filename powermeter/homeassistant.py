@@ -38,6 +38,7 @@ class HomeAssistant(Powermeter):
         )
         self.path_prefix = path_prefix
         self.session = requests.Session()
+        self._last_changed = []
 
     def get_json(self, path):
         if self.path_prefix:
@@ -51,6 +52,26 @@ class HomeAssistant(Powermeter):
             "content-type": "application/json",
         }
         return self.session.get(url, headers=headers, timeout=10).json()
+
+    def has_changed(self):
+        last_changed = []
+
+        if not self.power_calculate:
+            for entity in self.current_power_entity:
+                path = f"/api/states/{entity}"
+                response = self.get_json(path)
+                last_changed.append(response["last_changed"])
+        else:
+            for in_entity, out_entity in zip(self.power_input_alias, self.power_output_alias):
+                response_in = self.get_json(f"/api/states/{in_entity}")
+                response_out = self.get_json(f"/api/states/{out_entity}")
+                last_changed.append((response_in["last_changed"], response_out["last_changed"]))
+
+        if last_changed == self._last_changed:
+            return False
+
+        self._last_changed = last_changed
+        return True
 
     def get_powermeter_watts(self):
         if not self.power_calculate:

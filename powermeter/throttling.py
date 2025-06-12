@@ -58,6 +58,13 @@ class ThrottledPowermeter(Powermeter):
 
             # Time to get fresh values (either enough time passed or we waited)
             try:
+                # Skip update if homeassistant entities didn't change
+                if isinstance(self.wrapped_powermeter, HomeAssistant):
+                    if not self.wrapped_powermeter.has_changed():
+                        print(
+                            f"Values didn't change. Skipping this update."
+                            )
+                        return []
                 values = self.wrapped_powermeter.get_powermeter_watts()
                 self.last_values = values
                 self.last_update_time = current_time
