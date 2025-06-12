@@ -58,6 +58,9 @@ class ThrottledPowermeter(Powermeter):
             # Time to get fresh values (either enough time passed or we waited)
             try:
                 # Skip update if homeassistant entities didn't change
+                print(f"Checking has_changed: {hasattr(self.wrapped_powermeter, 'has_changed')}")
+                print(f"Type of has_changed: {type(getattr(self.wrapped_powermeter, 'has_changed', None))}")
+
                 if callable(getattr(self.wrapped_powermeter, "has_changed", None)):
                     if not self.wrapped_powermeter.has_changed():
                         print("Throttling: Values didn't change. Sleeping again.")
