@@ -2,7 +2,6 @@ import time
 import threading
 from typing import List, Optional
 from .base import Powermeter
-from .homeassistant import HomeAssistant
 
 class ThrottledPowermeter(Powermeter):
     """
@@ -59,12 +58,12 @@ class ThrottledPowermeter(Powermeter):
             # Time to get fresh values (either enough time passed or we waited)
             try:
                 # Skip update if homeassistant entities didn't change
-                if isinstance(self.wrapped_powermeter, HomeAssistant):
+                if callable(getattr(self.wrapped_powermeter, "has_changed", None)):
                     if not self.wrapped_powermeter.has_changed():
-                        print(
-                            f"Values didn't change. Skipping this update."
-                            )
+                        print("Throttling: Values didn't change. Sleeping again.")
+                        time.sleep(self.throttle_interval)
                         return []
+
                 values = self.wrapped_powermeter.get_powermeter_watts()
                 self.last_values = values
                 self.last_update_time = current_time
