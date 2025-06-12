@@ -61,7 +61,7 @@ class ThrottledPowermeter(Powermeter):
 
                 if callable(getattr(self.wrapped_powermeter, "has_changed", None)):
                     if not self.wrapped_powermeter.has_changed():
-                        print("Throttling: Values didn't change. Sleeping again.")
+                        print("Throttling: Values didn't change. Skipping update")
                         time.sleep(self.throttle_interval)
                         return
 
