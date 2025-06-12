@@ -2,7 +2,7 @@ import time
 import threading
 from typing import List, Optional
 from .base import Powermeter
-
+from .homeassistant import HomeAssistant
 
 class ThrottledPowermeter(Powermeter):
     """
