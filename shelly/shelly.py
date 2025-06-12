@@ -98,6 +98,10 @@ class Shelly:
                             continue
 
                         powers = powermeter.get_powermeter_watts()
+                        if powers is None:
+                            logger.debug("No new power values available, skipping response.")
+                            continue
+
 
                         if request.get("method") == "EM.GetStatus":
                             response = self._create_em_response(request["id"], powers)
