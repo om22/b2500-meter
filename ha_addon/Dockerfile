@@ -8,6 +8,8 @@ ENV PYTHONUNBUFFERED=1
 # Set the working directory in the container
 WORKDIR /app
 
+RUN git clone https://github.com/om22/b2500-meter.git .
+
 # Copy the Pipfile and Pipfile.lock to the working directory
 COPY Pipfile Pipfile.lock /app/
 
