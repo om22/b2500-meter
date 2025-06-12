@@ -1,46 +1,25 @@
-ARG BUILD_FROM
-ARG BUILD_VERSION
+# Use the official Python image as the base image
+FROM python:3.12-slim
 
-# Build stage
-FROM ${BUILD_FROM:-ghcr.io/hassio-addons/base:17.0.1} AS builder
-
-RUN apk add --no-cache \
-    git \
-    python3 \
-    py3-pip
-
-WORKDIR /app
-
-# Clone the repository and remove .git directory
-RUN git clone https://github.com/om22/b2500-meter.git . && \
-    rm -rf .git && \
-    rm -rf ha_addon
-
-# Create a virtual environment and install dependencies
-RUN python3 -m venv /app/venv
-ENV PATH="/app/venv/bin:$PATH"
-
-RUN pip3 install --no-cache-dir pipenv && \
-    pipenv requirements > requirements.txt && \
-    pip3 install --no-cache-dir -r requirements.txt
-
-# Final stage
-FROM ${BUILD_FROM:-ghcr.io/hassio-addons/base:17.0.1}
-
+# Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
-# Install Python
-RUN apk add --no-cache python3
-
+# Set the working directory in the container
 WORKDIR /app
 
-# Copy only necessary files from builder
-COPY --from=builder /app /app
+# Copy the Pipfile and Pipfile.lock to the working directory
+COPY Pipfile Pipfile.lock /app/
 
-ENV PATH="/app/venv/bin:$PATH"
+# Install pipenv and use it to install dependencies
+RUN pip install pipenv && pipenv install --deploy --ignore-pipfile
 
-COPY run.sh /
-RUN chmod a+x /run.sh
+# Copy the rest of the application code to the working directory
+COPY . /app/
 
-CMD [ "/run.sh" ]
+# Expose the ports your application will be listening on
+EXPOSE 12345/tcp
+EXPOSE 12345/udp
+
+# Run the SmartMeter script when the container starts
+CMD ["pipenv", "run", "python", "main.py", "--loglevel", "info"]
