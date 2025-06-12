@@ -12,7 +12,7 @@ RUN apk add --no-cache \
 WORKDIR /app
 
 # Clone the repository and remove .git directory
-RUN git clone https://github.com/tomquist/b2500-meter.git . && \
+RUN git clone https://github.com/om22/b2500-meter.git . && \
     rm -rf .git && \
     rm -rf ha_addon
 
